@@ -1,0 +1,7 @@
+{
+  "alphabet": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-",
+  "max_plate_slots": 9,
+  "pad_char": "-",
+  "img_width": 140,
+  "img_height": 70
+}

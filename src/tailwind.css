@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@tailwind utilities;
+
+
+
+@theme {
+    /* Definición de colores personalizados */
+    --color-primary-light: 79 70 229; /* RGB para #4F46E5 */
+    --color-primary-dark: 99 102 241; /* RGB para #6366F1 */
+    --color-secondary-light: 37 99 235; /* RGB para #2563EB */
+    --color-secondary-dark: 59 130 246; /* RGB para #3B82F6 */
+  }
+/* Estilos base para elementos que necesitan reglas específicas que no se pueden replicar fácilmente con clases de utilidad */
+@layer base {
+  canvas {
+    @apply hidden max-w-full max-h-[80vh] border border-gray-300 dark:border-gray-700 shadow-md;
+  }
+  
+  video {
+    @apply hidden;
+  }
+}
+
+@layer components {
+    /* Botón base */
+    .btn {
+      @apply font-medium py-3 px-6 rounded-lg transition transform duration-300 shadow-md
+             focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed
+             flex items-center justify-center
+             dark:border dark:border-gray-600; /* Nuevo: borde en modo oscuro */
+    }
+    
+    /* Variante primaria */
+    .btn-primary {
+      @apply bg-primary-light text-gray-800 dark:bg-primary-dark dark:text-white;
+      @apply hover:bg-primary-dark dark:hover:bg-primary-light;
+      @apply focus:ring-primary-dark;
+      /* Efectos de escala para interacción */
+      @apply hover:scale-105 active:scale-95;
+      @apply dark:border-primary-light/30; /* Nuevo: borde del color primario con opacidad */
+    }
+    
+    /* Variante secundaria */
+    .btn-secondary {
+      @apply bg-secondary-light text-gray-800 dark:bg-secondary-dark dark:text-white py-2 px-4;
+      @apply hover:bg-secondary-dark dark:hover:bg-secondary-light;
+      @apply focus:ring-secondary-dark;
+      @apply hover:scale-105 active:scale-95;
+      @apply dark:border-secondary-light/30; /* Nuevo: borde del color secundario con opacidad */
+    }
+    
+    /* Toggle de modo oscuro (ejemplo) */
+    .dark-mode-toggle {
+      @apply flex items-center justify-start bg-gray-300 dark:bg-gray-600 w-14 h-7 
+             rounded-full p-1 cursor-pointer transition-colors duration-300;
+    }
+    
+    .toggle-circle {
+      @apply bg-white dark:bg-gray-800 w-5 h-5 rounded-full flex items-center 
+             justify-center shadow-md transform transition-transform duration-300;
+    }
+    
+    .toggle-active .toggle-circle {
+      @apply translate-x-6;
+    }
+  }
+  
+
+/* Animación para el toggle de modo oscuro */
+@layer utilities {
+  .toggle-circle {
+    @apply transform transition-transform duration-300;
+  }
+  
+  .toggle-active .toggle-circle {
+    @apply translate-x-6;
+  }
+}
+
+@tailwind utilities;

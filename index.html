@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" no-cache>
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web ALPR</title>
+    <link href="/src/tailwind.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <!-- Header con título y toggle de modo oscuro -->
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex flex-col">
+                <h1 class="text-3xl font-bold text-primary-light dark:text-primary-dark">Web ALPR</h1>
+                <p class="text-sm md:text-base text-gray-600 dark:text-gray-400">Automatic License Plate Recognition in Browser</p>
+            </div>
+            
+            <!-- Toggle para modo oscuro -->
+            <button id="darkModeToggle" class="dark-mode-toggle">
+                <div class="toggle-circle">
+                    <!-- Icono de luna (modo oscuro) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-500 hidden dark:inline-block" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 9.003 0 0012 21a9.003 9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <!-- Icono de sol (modo claro) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-yellow-500 inline-block dark:hidden" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+            </button>
+        </div>
+        
+        <!-- Estado del modelo -->
+        <div id="modelStatus" class="text-center font-semibold mb-6 p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">Loading model...</div>
+        
+        
+        <!-- Controles principales -->
+        <div class="flex flex-col sm:flex-row justify-around gap-4 mb-6">
+            <button id="imageBtn" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="ml-2 sm:hidden md:inline-block">Image</span>
+            </button>
+            <button id="videoBtn" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span class="ml-2 sm:hidden md:inline-block">Video</span>
+            </button>
+            <button id="cameraBtn" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="ml-2 sm:hidden md:inline-block">Camera</span>
+            </button>
+        </div>
+        <!-- Inputs ocultos -->
+        <div class="hidden">
+            <input type="file" id="imageInput" accept="image/*">
+            <input type="file" id="videoInput" accept="video/*">
+        </div>
+        
+        <!-- Controles de reproducción -->
+        <div id="playbackControls" class="hidden justify-center gap-4 mb-6">
+            <button id="playBtn" class="btn btn-secondary">
+                <!-- Icono de Play (visible inicialmente) -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 play-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <!-- Icono de Pause (oculto inicialmente) -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 pause-icon hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="ml-2" id="playBtnText">Play</span>
+            </button>
+            <button id="stopBtn" class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                </svg>
+                <span class="ml-2">Stop</span>
+            </button>
+        </div>
+        
+        <!-- Contenedor del canvas -->
+        <div class="flex justify-center mt-6">
+            <div class="relative w-full max-w-4xl">
+                <canvas class="rounded-lg dark:shadow-xl object-scale-down"></canvas>
+                <video class="rounded-lg" autoplay muted playsinline></video>
+            </div>
+        </div>
+
+        <!-- Sección de detecciones de matrículas -->
+        <div id="plateDetections" class="mt-4 p-4 max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-y-auto max-h-80">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-lg font-semibold">Detected license plates</h3>
+                <div class="text-sm text-gray-600 dark:text-gray-400" id="detectionStats">
+                    <!-- Aquí se mostrarán estadísticas de detección -->
+                </div>
+            </div>
+            <div id="platesList" class="space-y-2">
+                <!-- Aquí se insertarán las detecciones -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para mostrar detalles de la matrícula -->
+    <div id="plateModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden transition-opacity duration-300">
+        <div class="modal-content bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden transform transition-transform duration-300 scale-95 opacity-0">
+            <!-- Cabecera del modal -->
+            <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">License Plate Details</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Contenido del modal -->
+            <div class="p-4">
+                <div class="flex flex-col items-center mb-4">
+                    <div id="plateImageContainer" class="mb-4 bg-gray-100 dark:bg-gray-700 rounded-md p-2">
+                        <!-- La imagen de la matrícula se insertará aquí -->
+                    </div>
+                    
+                    <div class="w-full">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Recognized text:</span>
+                            <span id="plateTextValue" class="text-xl font-bold text-primary-light dark:text-primary-dark"></span>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Average confidence:</span>
+                            <span id="plateConfidenceMean" class="ml-2 font-semibold"></span>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <span class="font-medium text-gray-700 dark:text-gray-300">Confidence by character:</span>
+                            <div id="confidenceChartContainer" class="mt-2 h-24 bg-gray-50 dark:bg-gray-900 rounded p-2">
+                                <!-- Aquí irá la representación visual de la confianza -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer del modal -->
+            <div class="bg-gray-50 dark:bg-gray-900 px-4 py-3 flex justify-end">
+                <button id="closeModalBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="/src/object_detector.js"></script>
+</body>
+</html>
